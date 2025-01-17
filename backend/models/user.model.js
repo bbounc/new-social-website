@@ -47,7 +47,6 @@ const userSchema = new mongoose.Schema(
 			type: String,
 			default: "",
 		},
-
 		link: {
 			type: String,
 			default: "",
@@ -59,6 +58,11 @@ const userSchema = new mongoose.Schema(
 				default: [],
 			},
 		],
+		politicalAffiliation: {
+			type: String,
+			enum: ["liberal", "conservative", "other"], // Ensures only valid options are set
+			required: true, // Making it mandatory
+		},
 	},
 	{ timestamps: true }
 );
