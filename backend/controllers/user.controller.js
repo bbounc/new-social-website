@@ -63,21 +63,35 @@ export const followUnfollowUser = async (req, res) => {
 export const getSuggestedUsers = async (req, res) => {
 	try {
 		const userId = req.user._id;
+	
 
 		const usersFollowedByMe = await User.findById(userId).select("following");
-
-		const users = await User.aggregate([
+		const affiliation = await User.findById(userId).select("politicalAffiliation");
+		const sameAffiliationUsers = await User.aggregate([
 			{
 				$match: {
-					_id: { $ne: userId },
+					_id: { $ne: userId }, // Exclude the current user
+					politicalAffiliation: affiliation, // Match same affiliation
 				},
 			},
-			{ $sample: { size: 10 } },
+			{ $sample: { size: 5 } },
 		]);
-
+		
+		// Fetch users with a different political affiliation
+		const differentAffiliationUsers = await User.aggregate([
+			{
+				$match: {
+					_id: { $ne: userId }, // Exclude the current user
+					politicalAffiliation: { $ne: affiliation }, // Match different affiliation
+				},
+			},
+			{ $sample: { size: 5 } },
+		]);
+		const users = [sameAffiliationUsers, differentAffiliationUsers];
 		// 1,2,3,4,5,6,
 		const filteredUsers = users.filter((user) => !usersFollowedByMe.following.includes(user._id));
-		const suggestedUsers = filteredUsers.slice(0, 4);
+		
+		const suggestedUsers = shuffleArray(filteredUsers).slice(0, 4);
 
 		suggestedUsers.forEach((user) => (user.password = null));
 
@@ -86,6 +100,13 @@ export const getSuggestedUsers = async (req, res) => {
 		console.log("Error in getSuggestedUsers: ", error.message);
 		res.status(500).json({ error: error.message });
 	}
+};
+const shuffleArray = (array) => {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));  // Random index
+        [array[i], array[j]] = [array[j], array[i]];  // Swap elements
+    }
+    return array;
 };
 
 export const updateUser = async (req, res) => {
