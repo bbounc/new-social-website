@@ -110,7 +110,7 @@ const shuffleArray = (array) => {
 };
 
 export const updateUser = async (req, res) => {
-	const { fullName, email, username, currentPassword, newPassword, bio, link } = req.body;
+	const { fullName, email, username, currentPassword, newPassword, bio, link, politicalAffiliation } = req.body;
 	let { profileImg, coverImg } = req.body;
 
 	const userId = req.user._id;
