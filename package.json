@@ -13,6 +13,7 @@
 	"type": "module",
 	"license": "ISC",
 	"dependencies": {
+		"@tailwindcss/vite": "^4.0.0",
 		"bcryptjs": "^2.4.3",
 		"cloudinary": "^2.1.0",
 		"cookie-parser": "^1.4.6",
@@ -21,9 +22,11 @@
 		"express": "^4.19.2",
 		"jsonwebtoken": "^9.0.2",
 		"mongodb": "^6.12.0",
-		"mongoose": "^8.3.1"
+		"mongoose": "^8.3.1",
+		"tailwindcss": "^4.0.0"
 	},
 	"devDependencies": {
+		"daisyui": "^4.12.23",
 		"nodemon": "^3.1.9"
 	}
 }
