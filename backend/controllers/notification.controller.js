@@ -1,5 +1,6 @@
 import Notification from "../models/notification.model.js";
 
+
 export const getNotifications = async (req, res) => {
 	try {
 		const userId = req.user._id;
@@ -30,3 +31,25 @@ export const deleteNotifications = async (req, res) => {
 		res.status(500).json({ error: "Internal Server Error" });
 	}
 };
+
+export const deleteNotification = async( req,res)=>{
+
+	try{ 
+const userId = req.user._id;
+const notficationId = req.params.id;
+const notification = await Notification.findById(notficationId);
+
+if(!notification){
+	return res.status(400).json({error: "Notification not found"})
+}
+if(notification.to.toString() !== userId.toString()){
+	return res.status(403).json({error:"You are not authorized"})
+}
+await Notification.findByIdAndDelete(notficationId);
+res.status(200).json({message: "Notification deleted"})
+	}
+	catch(error){
+console.log ("Error in notification function")
+res.status(500).json({error: "Internal Servor error"})
+	}
+}
