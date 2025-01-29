@@ -8,8 +8,8 @@ export const createPost = async (req, res) => {
 		const { text } = req.body;
 		let { img } = req.body;
 		const userId = req.user._id.toString();
-
 		const user = await User.findById(userId);
+		const affiliaton = user.select("politicalAffiliation");
 		if (!user) return res.status(404).json({ message: "User not found" });
 
 		if (!text && !img) {
@@ -25,6 +25,7 @@ export const createPost = async (req, res) => {
 			user: userId,
 			text,
 			img,
+			politicalAffiliation: affiliation,
 		});
 
 		await newPost.save();
@@ -65,7 +66,8 @@ export const commentOnPost = async (req, res) => {
 		const { text } = req.body;
 		const postId = req.params.id;
 		const userId = req.user._id;
-
+		const user = await User.findById(userId);
+		const affiliaton = user.select("politicalAffiliation");
 		if (!text) {
 			return res.status(400).json({ error: "Text field is required" });
 		}
@@ -75,7 +77,7 @@ export const commentOnPost = async (req, res) => {
 			return res.status(404).json({ error: "Post not found" });
 		}
 
-		const comment = { user: userId, text };
+		const comment = { user: userId, text, politicalAffiliation: affiliaton };
 
 		post.comments.push(comment);
 		await post.save();
