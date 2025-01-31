@@ -1,6 +1,22 @@
-const XSvg = (props) => (
-	<svg aria-hidden='true' viewBox='0 0 24 24' {...props}>
-		<path d='M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z' />
+const PartisanPulseLogo = (props) => (
+	<svg
+	  xmlns="http://www.w3.org/2000/svg"
+	  viewBox="0 0 100 100"
+	  {...props}
+	>
+	  {/* Background Circle */}
+	  <circle cx="50" cy="50" r="48" fill="#1E1E1E" stroke="#FFF" strokeWidth="2" />
+  
+	  {/* Left (Democratic) Section */}
+	  <path d="M10,50 A40,40 0 0,1 50,10 V50 Z" fill="#1877F2" />
+	  
+	  {/* Right (Republican) Section */}
+	  <path d="M50,10 A40,40 0 0,1 90,50 H50 Z" fill="#D93025" />
+	  
+	  {/* Center Pulse (Independent) */}
+	  <polyline points="20,60 40,40 50,55 60,35 80,60" stroke="#FFF" strokeWidth="4" fill="none" strokeLinecap="round" strokeLinejoin="round" />
 	</svg>
-);
-export default XSvg;
+  );
+  
+  export default PartisanPulseLogo;
+  

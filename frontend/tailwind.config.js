@@ -8,16 +8,15 @@ export default {
 	},
 	plugins: [daisyui],
 
-	daisyui: {
-		themes: [
-			"light",
+		daisyui: {
+		  themes: [
 			{
-				black: {
-					...daisyUIThemes["black"],
-					primary: "rgb(29, 155, 240)",
-					secondary: "rgb(24, 24, 24)",
-				},
+			  light: {
+				...require("daisyui/src/theming/themes")["light"],
+				primary: "blue",
+				secondary: "teal",
+			  },
 			},
-		],
-	},
+		  ],
+		},
 };
