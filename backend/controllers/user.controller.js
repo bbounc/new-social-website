@@ -63,10 +63,14 @@ export const followUnfollowUser = async (req, res) => {
 export const getSuggestedUsers = async (req, res) => {
 	try {
 		const userId = req.user._id;
-	
 
+		// Get the list of users the current user is following
 		const usersFollowedByMe = await User.findById(userId).select("following");
+
+		// Get the current user's political affiliation
 		const affiliation = await User.findById(userId).select("politicalAffiliation");
+
+		// Get users with the same political affiliation (same as the current user)
 		const sameAffiliationUsers = await User.aggregate([
 			{
 				$match: {
@@ -74,40 +78,53 @@ export const getSuggestedUsers = async (req, res) => {
 					politicalAffiliation: affiliation, // Match same affiliation
 				},
 			},
-			{ $sample: { size: 5 } },
+			{ $sample: { size: 5 } }, // Get a random sample of 5 users
 		]);
-		
-		// Fetch users with a different political affiliation
+
+		// Get users with a different political affiliation (not the same as the current user)
 		const differentAffiliationUsers = await User.aggregate([
 			{
 				$match: {
 					_id: { $ne: userId }, // Exclude the current user
-					politicalAffiliation: { $ne: affiliation }, // Match different affiliation
+					politicalAffiliation: { $ne: affiliation }, // Match a different affiliation
 				},
 			},
-			{ $sample: { size: 5 } },
+			{ $sample: { size: 5 } }, // Get a random sample of 5 users
 		]);
-		const users = [sameAffiliationUsers, differentAffiliationUsers];
-		// 1,2,3,4,5,6,
-		const filteredUsers = users.filter((user) => !usersFollowedByMe.following.includes(user._id));
-		
-		const suggestedUsers = shuffleArray(filteredUsers).slice(0, 4);
 
+		// Balance the selection, choose 2 users from each group (same affiliation and different affiliation)
+		const balancedUsers = [
+			...sameAffiliationUsers.slice(0, 4),  // Take 2 users from the same affiliation
+			...differentAffiliationUsers.slice(0, 4),  // Take 2 users from a different affiliation
+		];
+
+		// Filter out users already followed by the current user
+		const filteredUsers = balancedUsers.filter((user) => !usersFollowedByMe.following.includes(user._id));
+
+		// Shuffle the filtered users and ensure only 4 users are returned
+		const suggestedUsers = shuffleArray(filteredUsers).slice(0, 4); // Ensure 4 users in the response
+
+		// Remove sensitive data like password before returning the users
 		suggestedUsers.forEach((user) => (user.password = null));
 
+		// Send the final list of suggested users
+		console.log(suggestedUsers)
 		res.status(200).json(suggestedUsers);
 	} catch (error) {
 		console.log("Error in getSuggestedUsers: ", error.message);
 		res.status(500).json({ error: error.message });
 	}
 };
+
+// Shuffle function to randomize user order
 const shuffleArray = (array) => {
-    for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));  // Random index
-        [array[i], array[j]] = [array[j], array[i]];  // Swap elements
-    }
-    return array;
+	for (let i = array.length - 1; i > 0; i--) {
+		const j = Math.floor(Math.random() * (i + 1));  // Random index
+		[array[i], array[j]] = [array[j], array[i]];  // Swap elements
+	}
+	return array;
 };
+
 
 export const updateUser = async (req, res) => {
 	const { fullName, email, username, currentPassword, newPassword, bio, link, politicalAffiliation } = req.body;
