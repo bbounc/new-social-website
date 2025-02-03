@@ -9,7 +9,7 @@ export const createPost = async (req, res) => {
 		let { img } = req.body;
 		const userId = req.user._id.toString();
 		const user = await User.findById(userId);
-		const affiliaton = user.select("politicalAffiliation");
+		const affiliaton = user.politicalAffiliation;
 		if (!user) return res.status(404).json({ message: "User not found" });
 
 		if (!text && !img) {
@@ -25,7 +25,7 @@ export const createPost = async (req, res) => {
 			user: userId,
 			text,
 			img,
-			politicalAffiliation: affiliation,
+			politicalAffiliation: affiliaton,
 		});
 
 		await newPost.save();
