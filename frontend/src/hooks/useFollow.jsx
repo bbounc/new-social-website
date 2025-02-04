@@ -1,33 +1,29 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 
-const useUpdateUserProfile = () => {
+const useFollow = () => {
 	const queryClient = useQueryClient();
 
-	const { mutateAsync: updateProfile, isPending: isUpdatingProfile } = useMutation({
-		mutationFn: async (formData) => {
+	const { mutate: follow, isPending } = useMutation({
+		mutationFn: async (userId) => {
 			try {
-				const res = await fetch(`/api/users/update`, {
+				const res = await fetch(`/api/users/follow/${userId}`, {
 					method: "POST",
-					headers: {
-						"Content-Type": "application/json",
-					},
-					body: JSON.stringify(formData),
 				});
+
 				const data = await res.json();
 				if (!res.ok) {
-					throw new Error(data.error || "Something went wrong");
+					throw new Error(data.error || "Something went wrong!");
 				}
-				return data;
+				return;
 			} catch (error) {
 				throw new Error(error.message);
 			}
 		},
 		onSuccess: () => {
-			toast.success("Profile updated successfully");
 			Promise.all([
+				queryClient.invalidateQueries({ queryKey: ["suggestedUsers"] }),
 				queryClient.invalidateQueries({ queryKey: ["authUser"] }),
-				queryClient.invalidateQueries({ queryKey: ["userProfile"] }),
 			]);
 		},
 		onError: (error) => {
@@ -35,7 +31,7 @@ const useUpdateUserProfile = () => {
 		},
 	});
 
-	return { updateProfile, isUpdatingProfile };
+	return { follow, isPending };
 };
 
-export default useUpdateUserProfile;
+export default useFollow;
