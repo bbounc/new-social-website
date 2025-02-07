@@ -3,7 +3,7 @@ import PostSkeleton from "../skeletons/PostSkeleton";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
 
-const Posts = ({ feedType, username, userId }) => {
+const Posts = ({ feedType, username, userId, affilation }) => {
 	const getPostEndpoint = () => {
 		switch (feedType) {
 			case "forYou":
@@ -62,9 +62,17 @@ const Posts = ({ feedType, username, userId }) => {
 			)}
 			{!isLoading && !isRefetching && posts && (
 				<div>
-					{posts.map((post) => (
-						<Post key={post._id} post={post} />
-					))}
+					{posts.map((post) => {
+						// Define border color based on political affiliation
+						const borderColor =
+							post.user.politicalAffiliation === "conservative"
+								? "border-red-600 border-4" // Conservative: red border
+							: post.user.politicalAffiliation === "liberal"
+							? "border-blue-600 border-4" // Liberal: blue border
+							: "border-gray-600 border-4"; // Neutral/Other: gray border
+
+						return <Post key={post._id} post={post} borderColor={borderColor} />;
+					})}
 				</div>
 			)}
 		</>

@@ -1,5 +1,6 @@
 import { useState } from "react";
 
+import displayedAffiliation from "../../components/common/RightPanel"
 import Posts from "../../components/common/Posts";
 import CreatePost from "./CreatePost";
 

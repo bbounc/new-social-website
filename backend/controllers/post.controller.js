@@ -86,7 +86,6 @@ export const commentOnPost = async (req, res) => {
 	}
 }
 
-
 export const likeUnlikePost = async (req, res) => {
 	try {
 		const userId = req.user._id;
@@ -129,6 +128,7 @@ export const likeUnlikePost = async (req, res) => {
 	}
 };
 
+
 export const getAllPosts = async (req, res) => {
 	try {
 		const posts = await Post.find()
@@ -152,6 +152,78 @@ export const getAllPosts = async (req, res) => {
 		res.status(500).json({ error: "Internal server error" });
 	}
 };
+export const getConservativePosts = async (req, res) => {
+	try {
+		const posts = await Post.find()
+			.sort({ createdAt: -1 })
+			.populate({
+				path: "user",
+				match: { politicalAffiliation: "conservative" }, // Filter users with conservative affiliation
+				select: "-password",
+			})
+			.populate({
+				path: "comments.user",
+				select: "-password",
+			});
+
+		// Filter out posts where the user field is null (users who don't match the political affiliation)
+		const conservativePosts = posts.filter(post => post.user);
+
+		res.status(200).json(conservativePosts);
+	} catch (error) {
+		console.log("Error in getConservativePosts controller: ", error);
+		res.status(500).json({ error: "Internal server error" });
+	}
+};
+
+export const getLiberalPosts = async (req, res) => {
+	try {
+		const posts = await Post.find()
+			.sort({ createdAt: -1 })
+			.populate({
+				path: "user",
+				match: { politicalAffiliation: "liberal" }, // Filter users with liberal affiliation
+				select: "-password",
+			})
+			.populate({
+				path: "comments.user",
+				select: "-password",
+			});
+
+		const liberalPosts = posts.filter(post => post.user);
+
+		res.status(200).json(liberalPosts);
+	} catch (error) {
+		console.log("Error in getLiberalPosts controller: ", error);
+		res.status(500).json({ error: "Internal server error" });
+	}
+};
+
+export const getOtherPosts = async (req, res) => {
+	try {
+		const posts = await Post.find()
+			.sort({ createdAt: -1 })
+			.populate({
+				path: "user",
+				match: { politicalAffiliation: "other" }, // Filter users with other affiliation
+				select: "-password",
+			})
+			.populate({
+				path: "comments.user",
+				select: "-password",
+			});
+
+		const otherPosts = posts.filter(post => post.user);
+
+		res.status(200).json(otherPosts);
+	} catch (error) {
+		console.log("Error in getOtherPosts controller: ", error);
+		res.status(500).json({ error: "Internal server error" });
+	}
+};
+
+
+
 
 export const getLikedPosts = async (req, res) => {
 	const userId = req.params.id;

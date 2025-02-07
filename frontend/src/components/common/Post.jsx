@@ -60,10 +60,6 @@ const Post = ({ post }) => {
 			}
 		},
 		onSuccess: (updatedLikes) => {
-			// this is not the best UX, bc it will refetch all posts
-			// queryClient.invalidateQueries({ queryKey: ["posts"] });
-
-			// instead, update the cache directly for that post
 			queryClient.setQueryData(["posts"], (oldData) => {
 				return oldData.map((p) => {
 					if (p._id === post._id) {
@@ -77,6 +73,17 @@ const Post = ({ post }) => {
 			toast.error(error.message);
 		},
 	});
+
+	const borderColor = () => {
+		switch (postOwner.politicalAffiliation) {
+			case "liberal":
+				return "border-blue-500";
+			case "conservative":
+				return "border-red-500";
+			default:
+				return "border-gray-500";
+		}
+	};
 
 	const { mutate: commentPost, isPending: isCommenting } = useMutation({
 		mutationFn: async () => {
@@ -127,9 +134,15 @@ const Post = ({ post }) => {
 		<>
 			<div className='flex gap-2 items-start p-4 border-b border-gray-700'>
 				<div className='avatar'>
-					<Link to={`/profile/${postOwner.username}`} className='w-8 rounded-full overflow-hidden'>
-						<img src={postOwner.profileImg || "/avatar-placeholder.png"} />
-					</Link>
+					<div className={`w-8 h-8 rounded-full border-4 ${borderColor()}`}>
+						<Link to={`/profile/${postOwner.username}`} className='w-8 h-8 rounded-full overflow-hidden'>
+							<img
+								src={postOwner.profileImg || "/avatar-placeholder.png"}
+								className="w-full h-full object-cover"
+								alt={`${postOwner.username}'s profile`}
+							/>
+						</Link>
+					</div>
 				</div>
 				<div className='flex flex-col flex-1'>
 					<div className='flex gap-2 items-center'>
@@ -146,7 +159,6 @@ const Post = ({ post }) => {
 								{!isDeleting && (
 									<FaTrash className='cursor-pointer hover:text-red-500' onClick={handleDeletePost} />
 								)}
-
 								{isDeleting && <LoadingSpinner size='sm' />}
 							</span>
 						)}
@@ -253,4 +265,4 @@ const Post = ({ post }) => {
 		</>
 	);
 };
-export default Post;
+export default Post ;
