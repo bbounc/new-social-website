@@ -189,3 +189,27 @@ export const updateUser = async (req, res) => {
 		res.status(500).json({ error: error.message });
 	}
 };
+
+
+
+export const searchUsers = async (req, res) => {
+  const query = req.query.q || ''; // Get search query from request parameters
+
+  try {
+    // Perform a case-insensitive search on the username field
+    const users = await User.find({
+      username: { $regex: query, $options: 'i' }, // Match the username (case-insensitive)
+    }).limit(10); // Limit the results to 10 users to avoid large responses
+
+    // If no users are found
+    if (users.length === 0) {
+      return res.status(404).json({ message: "No users found" });
+    }
+
+    // Return the list of users that match the query
+    res.status(200).json(users);
+  } catch (error) {
+    console.log("Error in searchUsers:", error.message);
+    res.status(500).json({ error: error.message });
+  }
+};
