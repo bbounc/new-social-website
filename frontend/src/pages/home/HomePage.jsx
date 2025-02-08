@@ -2,7 +2,7 @@ import { useState } from "react";
 import Posts from "../../components/common/Posts";
 import CreatePost from "./CreatePost";
 import RightPanel from "../../components/common/RightPanel";
-import SearchUsers from "../../components/common/SearchUsers";  // Import the SearchUsers component
+
 
 const FeedTabs = ({ feedType, setFeedType }) => {
   return (
@@ -33,11 +33,7 @@ const HomePage = () => {
       <div className='flex-[4] min-w-[600px] max-w-[800px] border-r border-gray-700'>
         <FeedTabs feedType={feedType} setFeedType={setFeedType} />
         
-        {/* Place the Search Bar under the profile section */}
-        <div className="mt-4">
-          <SearchUsers /> {/* This will be your search bar */}
-        </div>
-
+   
         <CreatePost />
         <Posts feedType={feedType} affiliation={displayedAffiliation} />
       </div>
