@@ -47,12 +47,23 @@ const NotificationPage = () => {
 		},
 	});
 
+	const borderColor = (politicalAffiliation) => {
+		switch (politicalAffiliation) {
+			case "liberal":
+				return "border-blue-500"; // Tailwind's blue border
+			case "conservative":
+				return "border-red-500"; // Tailwind's red border
+			default:
+				return "border-gray-500"; // Default gray border
+		}
+	};
+
 	return (
 		<>
 			<div className='flex-[4_4_0] border-l border-r border-gray-700 min-h-screen'>
 				<div className='flex justify-between items-center p-4 border-b border-gray-700'>
 					<p className='font-bold'>Notifications</p>
-					<div className='dropdown '>
+					<div className='dropdown'>
 						<div tabIndex={0} role='button' className='m-1'>
 							<IoSettingsOutline className='w-4' />
 						</div>
@@ -79,8 +90,11 @@ const NotificationPage = () => {
 							{notification.type === "like" && <FaHeart className='w-7 h-7 text-red-500' />}
 							<Link to={`/profile/${notification.from.username}`}>
 								<div className='avatar'>
-									<div className='w-8 rounded-full'>
-										<img src={notification.from.profileImg || "/avatar-placeholder.png"} />
+									{/* User avatar with dynamic border color */}
+									<div
+										className={`w-8 rounded-full relative border-4 ${borderColor(notification.from.politicalAffiliation)} hover:border-opacity-80`}
+									>
+										<img src={notification.from.profileImg || "/avatar-placeholder.png"} className="rounded-full" />
 									</div>
 								</div>
 								<div className='flex gap-1'>
@@ -95,4 +109,5 @@ const NotificationPage = () => {
 		</>
 	);
 };
+
 export default NotificationPage;

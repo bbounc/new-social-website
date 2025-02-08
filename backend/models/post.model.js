@@ -13,6 +13,10 @@ const postSchema = new mongoose.Schema(
 		img: {
 			type: String,
 		},
+		politicalAffiliation: {
+			type: String,
+			enum: ["liberal", "conservative", "other"], // Ensures only valid options are set
+		},
 		likes: [
 			{
 				type: mongoose.Schema.Types.ObjectId,
@@ -29,6 +33,10 @@ const postSchema = new mongoose.Schema(
 					type: mongoose.Schema.Types.ObjectId,
 					ref: "User",
 					required: true,
+				},
+				politicalAffiliation: {
+					type: String,
+					enum: ["liberal", "conservative", "other"], // Ensures only valid options are set
 				},
 			},
 		],

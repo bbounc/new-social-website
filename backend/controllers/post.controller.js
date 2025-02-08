@@ -8,8 +8,8 @@ export const createPost = async (req, res) => {
 		const { text } = req.body;
 		let { img } = req.body;
 		const userId = req.user._id.toString();
-
 		const user = await User.findById(userId);
+		const affiliaton = user.politicalAffiliation;
 		if (!user) return res.status(404).json({ message: "User not found" });
 
 		if (!text && !img) {
@@ -25,6 +25,7 @@ export const createPost = async (req, res) => {
 			user: userId,
 			text,
 			img,
+			politicalAffiliation: affiliaton,
 		});
 
 		await newPost.save();
@@ -65,27 +66,25 @@ export const commentOnPost = async (req, res) => {
 		const { text } = req.body;
 		const postId = req.params.id;
 		const userId = req.user._id;
-
+		const user = await User.findById(userId).select("politicalAffiliation");
+		if (!user) return res.status(404).json({ error: "User not found" });
 		if (!text) {
 			return res.status(400).json({ error: "Text field is required" });
 		}
 		const post = await Post.findById(postId);
-
 		if (!post) {
 			return res.status(404).json({ error: "Post not found" });
 		}
 
-		const comment = { user: userId, text };
-
+		const comment = { user: userId, text, politicalAffiliation: user.politicalAffiliation };
 		post.comments.push(comment);
 		await post.save();
-
 		res.status(200).json(post);
 	} catch (error) {
 		console.log("Error in commentOnPost controller: ", error);
 		res.status(500).json({ error: "Internal server error" });
 	}
-};
+}
 
 export const likeUnlikePost = async (req, res) => {
 	try {
@@ -129,6 +128,7 @@ export const likeUnlikePost = async (req, res) => {
 	}
 };
 
+
 export const getAllPosts = async (req, res) => {
 	try {
 		const posts = await Post.find()
@@ -152,6 +152,41 @@ export const getAllPosts = async (req, res) => {
 		res.status(500).json({ error: "Internal server error" });
 	}
 };
+export const getPostsByAffiliation = async (req, res) => {
+    try {
+        console.log("Request received at /api/posts/:affiliation with params:", req.params);
+
+        const { affiliation } = req.params; // Expect 'liberal', 'conservative', or 'other'
+
+        if (!["liberal", "conservative", "other"].includes(affiliation)) {
+            console.log("Invalid affiliation received:", affiliation);
+            return res.status(400).json({ error: "Invalid political affiliation" });
+        }
+
+        console.log("Fetching posts for affiliation:", affiliation);
+        const posts = await Post.find({ politicalAffiliation: affiliation })
+            .sort({ createdAt: -1 })
+            .populate({
+                path: "user",
+                select: "-password",
+            })
+            .populate({
+                path: "comments.user",
+                select: "-password",
+            });
+
+        res.status(200).json(posts);
+    } catch (error) {
+        console.log("Error in getPostsByAffiliation controller: ", error);
+        res.status(500).json({ error: "Internal server error" });
+    }
+};
+
+
+
+
+
+
 
 export const getLikedPosts = async (req, res) => {
 	const userId = req.params.id;
@@ -179,22 +214,23 @@ export const getLikedPosts = async (req, res) => {
 
 export const getFollowingPosts = async (req, res) => {
 	try {
+		if (!req.user || !req.user._id) {
+			return res.status(401).json({ error: "Unauthorized" });
+		}
+
 		const userId = req.user._id;
 		const user = await User.findById(userId);
 		if (!user) return res.status(404).json({ error: "User not found" });
 
 		const following = user.following;
+		if (!following || following.length === 0) {
+			return res.status(200).json([]);
+		}
 
 		const feedPosts = await Post.find({ user: { $in: following } })
 			.sort({ createdAt: -1 })
-			.populate({
-				path: "user",
-				select: "-password",
-			})
-			.populate({
-				path: "comments.user",
-				select: "-password",
-			});
+			.populate({ path: "user", select: "-password" })
+			.populate({ path: "comments.user", select: "-password" });
 
 		res.status(200).json(feedPosts);
 	} catch (error) {
@@ -202,6 +238,7 @@ export const getFollowingPosts = async (req, res) => {
 		res.status(500).json({ error: "Internal server error" });
 	}
 };
+
 
 export const getUserPosts = async (req, res) => {
 	try {

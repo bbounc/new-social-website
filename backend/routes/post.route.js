@@ -1,20 +1,21 @@
 import express from "express";
 import { protectRoute } from "../middleware/protectRoute.js";
 import {
-	commentOnPost,
-	createPost,
-	deletePost,
-	getAllPosts,
-	getFollowingPosts,
-	getLikedPosts,
-	getUserPosts,
-	likeUnlikePost,
+    commentOnPost,
+    createPost,
+    deletePost,
+    getAllPosts,
+    getFollowingPosts,
+    getLikedPosts,
+    getUserPosts,
+    likeUnlikePost,
 } from "../controllers/post.controller.js";
 
 const router = express.Router();
 
+// Corrected route order
 router.get("/all", protectRoute, getAllPosts);
-router.get("/following", protectRoute, getFollowingPosts);
+router.get("/following", protectRoute, getFollowingPosts); // Moved above affiliation route
 router.get("/likes/:id", protectRoute, getLikedPosts);
 router.get("/user/:username", protectRoute, getUserPosts);
 router.post("/create", protectRoute, createPost);

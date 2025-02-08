@@ -73,6 +73,17 @@ const ProfilePage = () => {
 		refetch();
 	}, [username, refetch]);
 
+	const borderColor = (politicalAffiliation) => {
+		switch (politicalAffiliation) {
+			case "liberal":
+				return "border-blue-500"; // Tailwind's blue border
+			case "conservative":
+				return "border-red-500"; // Tailwind's red border
+			default:
+				return "border-gray-500"; // Default gray border
+		}
+	};
+
 	return (
 		<>
 			<div className='flex-[4_4_0]  border-r border-gray-700 min-h-screen '>
@@ -123,8 +134,13 @@ const ProfilePage = () => {
 								/>
 								{/* USER AVATAR */}
 								<div className='avatar absolute -bottom-16 left-4'>
-									<div className='w-32 rounded-full relative group/avatar'>
-										<img src={profileImg || user?.profileImg || "/avatar-placeholder.png"} />
+									<div
+										className={`w-32 rounded-full relative border-4 ${borderColor(user?.politicalAffiliation)} hover:border-opacity-80 group/avatar`}
+									>
+										<img
+											src={profileImg || user?.profileImg || "/avatar-placeholder.png"}
+											className="rounded-full"
+										/>
 										<div className='absolute top-5 right-3 p-1 bg-primary rounded-full group-hover/avatar:opacity-100 opacity-0 cursor-pointer'>
 											{isMyProfile && (
 												<MdEdit
@@ -231,4 +247,5 @@ const ProfilePage = () => {
 		</>
 	);
 };
+
 export default ProfilePage;
