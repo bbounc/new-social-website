@@ -193,23 +193,31 @@ export const updateUser = async (req, res) => {
 
 
 export const searchUsers = async (req, res) => {
-  const query = req.query.q || ''; // Get search query from request parameters
-
-  try {
-    // Perform a case-insensitive search on the username field
-    const users = await User.find({
-      username: { $regex: query, $options: 'i' }, // Match the username (case-insensitive)
-    }).limit(10); // Limit the results to 10 users to avoid large responses
-
-    // If no users are found
-    if (users.length === 0) {
-      return res.status(404).json({ message: "No users found" });
-    }
-
-    // Return the list of users that match the query
-    res.status(200).json(users);
-  } catch (error) {
-    console.log("Error in searchUsers:", error.message);
-    res.status(500).json({ error: error.message });
-  }
-};
+	const query = req.query.query?.trim() || ''; // Match frontend request & trim whitespace
+  
+	if (!query) {
+	  return res.status(400).json({ error: "Search query is required" });
+	}
+  
+	try {
+	  // Perform a case-insensitive search on username & fullName fields
+	  const users = await User.find({
+		$or: [
+		  { username: { $regex: query, $options: "i" } },
+		  { fullName: { $regex: query, $options: "i" } }
+		]
+	  })
+		.limit(10) // Limit results to prevent large responses
+		.select("username fullName profileImg politicalAffiliation"); // Only return necessary fields
+  
+	  if (users.length === 0) {
+		return res.status(404).json({ message: "No users found" });
+	  }
+  
+	  res.status(200).json(users);
+	} catch (error) {
+	  console.error("Error in searchUsers:", error.message);
+	  res.status(500).json({ error: "Internal server error" });
+	}
+  };
+  
