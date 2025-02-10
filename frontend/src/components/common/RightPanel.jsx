@@ -15,10 +15,10 @@ const fetchCurrentUser = async () => {
   return data;
 };
 
-const RightPanel = ({ setDisplayedAffiliation }) => { // Ensure prop is received
+const RightPanel = ({ setDisplayedAffiliation }) => { 
   if (typeof setDisplayedAffiliation !== "function") {
     console.error("setDisplayedAffiliation is not a function! Make sure it's passed correctly.");
-    return null; // Avoid rendering component if the function is missing
+    return null;
   }
 
   const { data: suggestedUsers, isLoading: isSuggestedUsersLoading } = useQuery({
@@ -46,47 +46,35 @@ const RightPanel = ({ setDisplayedAffiliation }) => { // Ensure prop is received
 
   const affiliations = ["liberal", "conservative", "other"];
   const [displayedAffiliation, setLocalAffiliation] = useState("");
-  const [timer, setTimer] = useState(0);
-
-  useEffect(() => {
-    const savedTime = localStorage.getItem("timer");
-    if (savedTime) {
-      setTimer(Number(savedTime));
-    }
-  }, []);
+  const [timer, setTimer] = useState(1800000); // Set timer to 30 minutes (1800000ms)
 
   useEffect(() => {
     if (currentUser) {
       const initialAffiliation = currentUser.politicalAffiliation || "other";
+      
       setLocalAffiliation(initialAffiliation);
-      setDisplayedAffiliation(initialAffiliation); // Update HomePage state
-
-      const now = Date.now();
-      const savedTime = localStorage.getItem("timer");
-
-      if (savedTime) {
-        setTimer(Number(savedTime));
-      } else {
-        const timeLeft = (30 * 60 * 1000) - (now % (30 * 60 * 1000));
-        setTimer(timeLeft);
-        localStorage.setItem("timer", timeLeft);
-      }
+  
+      // Only update HomePage state if it's actually different
+      setDisplayedAffiliation((prev) => {
+        return prev !== initialAffiliation ? initialAffiliation : prev;
+      });
     }
   }, [currentUser, setDisplayedAffiliation]);
+  
 
   useEffect(() => {
     const interval = setInterval(() => {
       setTimer((prevTime) => {
         const newTime = prevTime - 1000;
-        localStorage.setItem("timer", newTime);
 
         if (newTime <= 0) {
           const currentAffiliationIndex = affiliations.indexOf(displayedAffiliation);
           const nextAffiliation = affiliations[(currentAffiliationIndex + 1) % affiliations.length];
+          
           setLocalAffiliation(nextAffiliation);
-          setDisplayedAffiliation(nextAffiliation); // Update HomePage state
-          localStorage.setItem("timer", 30 * 60 * 1000);
-          return 30 * 60 * 1000;
+          setDisplayedAffiliation(nextAffiliation);
+          
+          return 1800000; // Reset timer to 30 minutes
         }
 
         return newTime;
@@ -97,8 +85,8 @@ const RightPanel = ({ setDisplayedAffiliation }) => { // Ensure prop is received
   }, [displayedAffiliation, setDisplayedAffiliation]);
 
   const formatTime = (time) => {
-    const minutes = Math.floor(time / (1000 * 60));
-    const seconds = Math.floor((time % (1000 * 60)) / 1000);
+    const minutes = Math.floor(time / 60000);
+    const seconds = Math.floor((time % 60000) / 1000);
     return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
   };
 
