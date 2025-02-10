@@ -3,7 +3,7 @@ import express from "express";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import { v2 as cloudinary } from "cloudinary";
-import cors from "cors"; // import cors
+
 
 import authRoutes from "./routes/auth.route.js";
 import userRoutes from "./routes/user.route.js";
@@ -26,10 +26,7 @@ const PORT = process.env.PORT || 5000;
 const __dirname = path.resolve();
 
 // Enable CORS
-app.use(cors({
-	origin: "http://localhost:3002", // Allow requests from your frontend
-	credentials: true, // Allow cookies to be sent with requests
-}));
+
 
 app.use(express.json({ limit: "5mb" })); // to parse req.body
 // limit shouldn't be too high to prevent DOS
