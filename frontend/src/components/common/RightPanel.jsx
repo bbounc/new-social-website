@@ -45,22 +45,21 @@ const RightPanel = ({ setDisplayedAffiliation }) => {
   const { follow, isPending } = useFollow();
 
   const affiliations = ["liberal", "conservative", "other"];
-  const [displayedAffiliation, setLocalAffiliation] = useState("");
-  const [timer, setTimer] = useState(1800000); // Set timer to 30 minutes (1800000ms)
+  const [displayedAffiliation, setLocalAffiliation] = useState("other");
+  const [nextAffiliation, setNextAffiliation] = useState("liberal");
+  const [timer, setTimer] = useState(1800000);
 
   useEffect(() => {
     if (currentUser) {
-      const initialAffiliation = currentUser.politicalAffiliation || "other";
-      
+      const initialAffiliation = affiliations.find(
+        (aff) => aff === currentUser.politicalAffiliation
+      ) || "other";
       setLocalAffiliation(initialAffiliation);
-  
-      // Only update HomePage state if it's actually different
-      setDisplayedAffiliation((prev) => {
-        return prev !== initialAffiliation ? initialAffiliation : prev;
-      });
+      const nextIndex = (affiliations.indexOf(initialAffiliation) + 1) % affiliations.length;
+      setNextAffiliation(affiliations[nextIndex]);
+      setDisplayedAffiliation(initialAffiliation);
     }
   }, [currentUser, setDisplayedAffiliation]);
-  
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -69,12 +68,11 @@ const RightPanel = ({ setDisplayedAffiliation }) => {
 
         if (newTime <= 0) {
           const currentAffiliationIndex = affiliations.indexOf(displayedAffiliation);
-          const nextAffiliation = affiliations[(currentAffiliationIndex + 1) % affiliations.length];
-          
-          setLocalAffiliation(nextAffiliation);
-          setDisplayedAffiliation(nextAffiliation);
-          
-          return 1800000; // Reset timer to 30 minutes
+          const nextAff = affiliations[(currentAffiliationIndex + 1) % affiliations.length];
+          setLocalAffiliation(nextAff);
+          setDisplayedAffiliation(nextAff);
+          setNextAffiliation(affiliations[(currentAffiliationIndex + 2) % affiliations.length]);
+          return 1800000;
         }
 
         return newTime;
@@ -92,25 +90,28 @@ const RightPanel = ({ setDisplayedAffiliation }) => {
 
   return (
     <div className='hidden lg:block my-4 mx-2'>
-      <div className='bg-primary p-4 rounded-md sticky top-2'>
+      
         {/* Political Affiliation Display */}
         <div className="mb-4">
-          <label className="block font-bold mb-1">Your Affiliation</label>
-          <div className="relative">
-            <p className="w-full p-2 border border-gray-300 rounded-md bg-white text-black">
-              {displayedAffiliation}
-            </p>
-          </div>
+          <label className="block font-bold mb-1">Current Affiliation</label>
+          <p className="w-full p-3 border border-gray-300 rounded-lg bg-white text-black text-lg font-medium">
+            {displayedAffiliation.charAt(0).toUpperCase() + displayedAffiliation.slice(1)}
+          </p>
+        </div>
+
+        <div className="mb-4">
+          <label className="block font-bold mb-1">Next Affiliation</label>
+          <p className="w-full p-3 border border-gray-300 rounded-lg bg-white text-black text-lg font-medium">
+            {nextAffiliation.charAt(0).toUpperCase() + nextAffiliation.slice(1)}
+          </p>
         </div>
 
         {/* Time Left Until Next Affiliation Change */}
         <div className="mb-4">
           <label className="block font-bold mb-1">Time till Next Change</label>
-          <div className="relative">
-            <p className="w-full p-2 border border-gray-300 rounded-md bg-white text-black">
-              {formatTime(timer)}
-            </p>
-          </div>
+          <p className="w-full p-3 border border-gray-300 rounded-lg bg-white text-black">
+            {formatTime(timer)}
+          </p>
         </div>
 
         {/* Who to follow section */}
@@ -152,17 +153,14 @@ const RightPanel = ({ setDisplayedAffiliation }) => {
                       <span className='text-sm text-slate-500'>@{user.username}</span>
                     </div>
                   </div>
-                  <div>
-                    <button className='btn bg-white text-black rounded-full btn-sm' onClick={(e) => { e.preventDefault(); follow(user._id); }}>
-                      {isPending ? <LoadingSpinner size='sm' /> : "Follow"}
-                    </button>
-                  </div>
+                  <button className='btn bg-white text-black rounded-full btn-sm' onClick={(e) => { e.preventDefault(); follow(user._id); }}>
+                    {isPending ? <LoadingSpinner size='sm' /> : "Follow"}
+                  </button>
                 </Link>
               );
             })}
         </div>
       </div>
-    </div>
   );
 };
 

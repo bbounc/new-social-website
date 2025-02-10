@@ -4,17 +4,29 @@ import daisyUIThemes from "daisyui/src/theming/themes";
 export default {
 	content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
 	theme: {
-		extend: {},
+		extend: {
+			colors: {
+				redAccent: "#B22234", // Deep red
+				blueAccent: "#3C3B6E", // Navy blue
+			},
+		},
 	},
 	plugins: [daisyui],
-
-		daisyui: {
-		  themes: [
+	daisyui: {
+		themes: [
 			{
-			  light: {
-				...require("daisyui/src/theming/themes")["autumn"],
-			  },
+				patriotic: {
+					primary: "#B22234", // Red
+					secondary: "#3C3B6E", // Blue
+					accent: "#B22234", // Red accents
+					neutral: "#3C3B6E", // Blue neutral
+					"base-100": "#FFF5E1", // Light cream background
+					info: "#3C3B6E",
+					success: "#B22234",
+					warning: "#FFD700",
+					error: "#DC143C",
+				},
 			},
-		  ],
-		},
+		],
+	},
 };
