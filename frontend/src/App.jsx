@@ -12,18 +12,28 @@ import LoadingSpinner from "./components/common/LoadingSpinner";
 
 function App() {
   const { data: authUser, isLoading, error } = useQuery({
-    queryKey: ['authUser'],
+    queryKey: ["authUser"],
     queryFn: async () => {
-      const res = await fetch("/api/auth/me");
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || "Something went wrong");
+      const token = localStorage.getItem("token"); // Retrieve token
+
+      if (!token) {
+        return null; // No token = no auth user
       }
-      const data = await res.json();
-      if (data.error) return null;
-      return data;
+
+      const res = await fetch("/api/auth/me", {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`, // Attach token
+        },
+      });
+
+      if (!res.ok) {
+        throw new Error("Unauthorized: No Token Provided or Invalid Token");
+      }
+
+      return await res.json();
     },
-    retry: false,
+    retry: false, // Don't retry if unauthorized
   });
 
   if (isLoading) {
@@ -38,7 +48,7 @@ function App() {
     console.error(error);
     return (
       <div className="h-screen flex justify-center items-center text-red-500">
-        <p>Failed to load user data. Please try again later.</p>
+        <p>Failed to load user data. Please log in again.</p>
       </div>
     );
   }
